@@ -1,0 +1,9 @@
+{
+    "id": {
+        "type": "string",
+        "length": 15,
+        "autoincrement": true
+    },
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" }
+}
