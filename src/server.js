@@ -2,11 +2,6 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 
-const app = express();
-const PORT = process.env.PORT || 4000;
-const API_DIR = path.join(__dirname, '.');
-const API_PREFIX = '/api'
-
 /**
  * Loads a JSON file from the specified path.
  *
@@ -41,10 +36,10 @@ const getDataBy = (data, metadata, query) => {
     });
     const row = data.filter((columnRow) => {
         console.log(queryFilters)
-        return queryFilters.every(({index, name, value, evaluator}) => {
+        return queryFilters.every(({ index, name, value, evaluator }) => {
             const col = columnRow[index];
             if (evaluator === '~') return ((new RegExp(`\s${value}/s`)).test(col))
-            if (evaluator === '|') return (col.slice(0, value.length+1) === value + '-')
+            if (evaluator === '|') return (col.slice(0, value.length + 1) === value + '-')
             if (evaluator === '^') return (col.slice(0, value.length) === value)
             if (evaluator === '$') return (col.slice(-value.length) === value)
             if (evaluator === '*') return (col.indexOf(value) > -1)
@@ -63,11 +58,15 @@ const getDataBy = (data, metadata, query) => {
  */
 const rebuildColumn = (data, metadata) => {
     return Object.entries(metadata).reduce((acc, [columnName, props], index) => {
-        return {...acc, [columnName]: data[index]}
+        return { ...acc, [columnName]: data[index] }
     }, {})
 }
-
-app.get(`${API_PREFIX}/:dirName/:id?`, (req, res) => {
+/**
+ * Handles the GET request for a specific route.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ */
+const handleGetRequest = (API_DIR) => (req, res) => {
     const { dirName, id } = req.params;
     const dirPath = path.join(API_DIR, dirName);
 
@@ -84,26 +83,40 @@ app.get(`${API_PREFIX}/:dirName/:id?`, (req, res) => {
 
     const query = id ? { id } : req.query;
     res.json(getDataBy(data, metaData, query));
-});
+}
 
-const welcomeBanner = `
-▓█████▄  ▒█████   ▒█████   ███▄ ▄███▓▓██   ██▓    ▄▄▄       ██▓███   ██▓
-▒██▀ ██▌▒██▒  ██▒▒██▒  ██▒▓██▒▀█▀ ██▒ ▒██  ██▒   ▒████▄    ▓██░  ██▒▓██▒
-░██   █▌▒██░  ██▒▒██░  ██▒▓██    ▓██░  ▒██ ██░   ▒██  ▀█▄  ▓██░ ██▓▒▒██▒
-░▓█▄   ▌▒██   ██░▒██   ██░▒██    ▒██   ░ ▐██▓░   ░██▄▄▄▄██ ▒██▄█▓▒ ▒░██░
-░▒████▓ ░ ████▓▒░░ ████▓▒░▒██▒   ░██▒  ░ ██▒▓░    ▓█   ▓██▒▒██▒ ░  ░░██░
- ▒▒▓  ▒ ░ ▒░▒░▒░ ░ ▒░▒░▒░ ░ ▒░   ░  ░   ██▒▒▒     ▒▒   ▓▒█░▒▓▒░ ░  ░░▓  
- ░ ▒  ▒   ░ ▒ ▒░   ░ ▒ ▒░ ░  ░      ░ ▓██ ░▒░      ▒   ▒▒ ░░▒ ░      ▒ ░
- ░ ░  ░ ░ ░ ░ ▒  ░ ░ ░ ▒  ░      ░    ▒ ▒ ░░       ░   ▒   ░░        ▒ ░
-   ░        ░ ░      ░ ░         ░    ░ ░              ░  ░          ░  
- ░                                    ░ ░                               
+const welcomeBanner = (PORT, API_DIR) => `
+  ▓█████▄  ▒█████   ▒█████   ███▄ ▄███▓▓██   ██▓    ▄▄▄       ██▓███   ██▓
+  ▒██▀ ██▌▒██▒  ██▒▒██▒  ██▒▓██▒▀█▀ ██▒ ▒██  ██▒   ▒████▄    ▓██░  ██▒▓██▒
+  ░██   █▌▒██░  ██▒▒██░  ██▒▓██    ▓██░  ▒██ ██░   ▒██  ▀█▄  ▓██░ ██▓▒▒██▒
+  ░▓█▄   ▌▒██   ██░▒██   ██░▒██    ▒██   ░ ▐██▓░   ░██▄▄▄▄██ ▒██▄█▓▒ ▒░██░
+  ░▒████▓ ░ ████▓▒░░ ████▓▒░▒██▒   ░██▒  ░ ██▒▓░    ▓█   ▓██▒▒██▒ ░  ░░██░
+  ▒▒▓  ▒ ░ ▒░▒░▒░ ░ ▒░▒░▒░ ░ ▒░   ░  ░   ██▒▒▒     ▒▒   ▓▒█░▒▓▒░ ░  ░░▓  
+  ░ ▒  ▒   ░ ▒ ▒░   ░ ▒ ▒░ ░  ░      ░ ▓██ ░▒░      ▒   ▒▒ ░░▒ ░      ▒ ░
+  ░ ░  ░ ░ ░ ░ ▒  ░ ░ ░ ▒  ░      ░    ▒ ▒ ░░       ░   ▒   ░░        ▒ ░
+  ░        ░ ░      ░ ░         ░    ░ ░              ░  ░          ░  
+  ░                                    ░ ░                               
 
   Welcome to your API server!
+  - Server started at ${API_DIR} directory
   - API: http://localhost:${PORT}/api
 
   Happy coding! 🚀
-`;
+  `;
 
-app.listen(PORT, () => {
-    console.log(welcomeBanner);
-});
+const main = function (options) {
+    const { PORT = 4000, API_DIR = path.join(process.cwd(), '.'), API_PREFIX = '/api' } = options;
+    const FINAL_API_DIR = path.join(process.cwd(), API_DIR);
+    const app = express();
+
+    app.get(`${API_PREFIX}/:dirName/:id?`, handleGetRequest(FINAL_API_DIR));
+
+    app.listen(PORT, () => {
+        console.clear();
+        console.log(welcomeBanner(PORT,FINAL_API_DIR));
+    });
+}
+var args = process.argv.slice(2).reduce((acc, arg) => { const [,key,value] = arg.match(/--(\w+)\=([^--]+)/); return {...acc, [key]:value}}, {});
+
+main(args);
+export default main;
