@@ -1,13 +1,23 @@
 {
-    "name": "doomy-api",
-    "version": "1.0.0",
-    "description": "A lightweight mock REST API designed specifically for testing and development purposes",
-    "main": "dist/server.js",
-    
+  "name": "doomy-api",
+  "version": "1.0.0",
+  "description": "A lightweight mock REST API designed specifically for testing and development purposes",
+  "main": "dist/server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isaacnst/doomy-api.git"
+  },
+  "author": "Isaac Tzab",
+  "bugs": {
+    "url": "https://github.com/isaacnst/doomy-api/issues"
+  },
   "scripts": {
     "start": "npm run build && node ./dist/server.js",
     "dev": "nodemon --exec babel-node src/server.js",
     "build": "babel src/server.js --out-dir ./dist/ --copy-files"
+  },
+  "bin": {
+    "doomy-api": "./dist/server.js"
   },
   "dependencies": {
     "express": "^4.18.3"
