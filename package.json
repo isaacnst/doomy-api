@@ -1,6 +1,6 @@
 {
   "name": "doomy-api",
-  "version": "0.0.2",
+  "version": "1.0.1",
   "description": "A lightweight mock REST API designed specifically for testing and development purposes",
   "main": "dist/server.js",
   "repository": {
